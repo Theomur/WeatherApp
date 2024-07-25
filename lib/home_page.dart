@@ -28,8 +28,9 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
         backgroundColor: Theme.of(context).colorScheme.primaryFixed,
         appBar: AppBar(
+            shadowColor: Theme.of(context).colorScheme.primary,
             backgroundColor: Theme.of(context).colorScheme.primaryFixedDim,
-            elevation: 10,
+            elevation: 5,
             title: GestureDetector(
               onTap: locationEnter,
               child: Center(child: Text(location)),
@@ -40,6 +41,11 @@ class _HomePageState extends State<HomePage> {
               height: 100,
               width: 100,
               child: Text(Env.apikey),
+            ),
+            Container(
+              color: Theme.of(context).colorScheme.primaryFixedDim,
+              height: 100,
+              width: 100,
             )
           ],
         ));
