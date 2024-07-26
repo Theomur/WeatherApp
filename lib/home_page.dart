@@ -1,7 +1,6 @@
 // ignore_for_file: prefer_const_literals_to_create_immutables
 
 import 'package:flutter/material.dart';
-import 'package:weather_app/env/env.dart';
 import 'package:weather_app/location_dialog.dart';
 
 String location = 'Санкт-Петербург';
@@ -30,7 +29,7 @@ class _HomePageState extends State<HomePage> {
         appBar: AppBar(
             shadowColor: Theme.of(context).colorScheme.primary,
             backgroundColor: Theme.of(context).colorScheme.primaryFixedDim,
-            elevation: 5,
+            elevation: 10,
             title: GestureDetector(
               onTap: locationEnter,
               child: Center(child: Text(location)),
@@ -38,15 +37,13 @@ class _HomePageState extends State<HomePage> {
         body: Column(
           children: [
             SizedBox(
-              height: 100,
-              width: 100,
-              child: Text(Env.apikey),
+              height: 25,
             ),
-            Container(
-              color: Theme.of(context).colorScheme.primaryFixedDim,
+            SizedBox(
               height: 100,
               width: 100,
-            )
+              child: Text("Env.apikey"),
+            ),
           ],
         ));
   }
