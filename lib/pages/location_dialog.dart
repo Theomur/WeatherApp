@@ -25,10 +25,8 @@ class SelectLocation extends StatelessWidget {
               height: 30,
             ),
             Row(
+              mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                SizedBox(
-                  width: 200,
-                ),
                 CustumButton(
                   OnPressed: () {},
                 ),

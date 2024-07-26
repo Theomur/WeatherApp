@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:weather_app/pages/location_dialog.dart';
 
-String location = 'Санкт-Петербург';
+String location = 'Saint-Petesburg';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -43,7 +43,7 @@ class _HomePageState extends State<HomePage> {
           SizedBox(
             height: 100,
             width: 300,
-            child: Text("fdghj"),
+            child: Center(child: Text("")),
           ),
         ],
       ),
