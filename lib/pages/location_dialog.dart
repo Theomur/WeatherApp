@@ -5,11 +5,19 @@ import 'package:weather_app/env/env.dart';
 import 'package:weather_app/utils/button.dart';
 import 'package:weatherapi/weatherapi.dart';
 
+String? _inputString = "";
+
 class SelectLocation extends StatelessWidget {
-  const SelectLocation({super.key});
+  final Function(String) onLocationSelected;
+  const SelectLocation({super.key, required this.onLocationSelected});
 
   @override
   Widget build(BuildContext context) {
+    void Onpressed() {
+      onLocationSelected(_inputString!);
+      Navigator.of(context).pop();
+    }
+
     return AlertDialog(
       backgroundColor: Theme.of(context).colorScheme.primaryFixedDim,
       content: SizedBox(
@@ -18,7 +26,7 @@ class SelectLocation extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Text('Выберете местоположение', style: TextStyle(fontSize: 20)),
+            Text('Choose your location', style: TextStyle(fontSize: 20)),
             SizedBox(height: 20.0),
             _AsyncAutocomplete(),
             SizedBox(
@@ -28,7 +36,7 @@ class SelectLocation extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 CustumButton(
-                  OnPressed: () {},
+                  OnPressed: Onpressed,
                 ),
               ],
             ),
@@ -83,6 +91,7 @@ class _AsyncAutocompleteState extends State<_AsyncAutocomplete> {
   Widget build(BuildContext context) {
     return Autocomplete<String>(
       optionsBuilder: (TextEditingValue textEditingValue) async {
+        _inputString = textEditingValue.text;
         final Iterable<String>? options =
             await _debouncedSearch(textEditingValue.text);
         if (options == null) {
@@ -147,7 +156,7 @@ _Debounceable<S, T> _debounce<S, T>(_Debounceable<S?, T> function) {
 // A wrapper around Timer used for debouncing.
 class _DebounceTimer {
   _DebounceTimer() {
-    _timer = Timer(const Duration(seconds: 1), _onComplete);
+    _timer = Timer(const Duration(milliseconds: 500), _onComplete);
   }
 
   late final Timer _timer;
