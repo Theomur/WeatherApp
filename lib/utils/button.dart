@@ -4,7 +4,8 @@ import 'package:flutter/material.dart';
 
 class CustumButton extends StatelessWidget {
   VoidCallback OnPressed;
-  CustumButton({super.key, required this.OnPressed});
+  String ButtonText;
+  CustumButton({super.key, required this.OnPressed, required this.ButtonText});
 
   @override
   Widget build(BuildContext context) {
@@ -12,7 +13,7 @@ class CustumButton extends StatelessWidget {
       onPressed: OnPressed,
       color: Theme.of(context).colorScheme.primaryFixed,
       elevation: 5,
-      child: Text("OK"),
+      child: Text(ButtonText),
     );
   }
 }

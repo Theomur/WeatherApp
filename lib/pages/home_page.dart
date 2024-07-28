@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:weather_app/pages/location_dialog.dart';
 
-String location = 'Moscow, Russia';
+String Location = 'Moscow, Russia';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -13,19 +13,19 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  void changeCity(String newCity) {
-    List<String> cityCountry = newCity.split(',');
+  void ChangeLocation_AppBar(String newLocation) {
+    List<String> cityCountry = newLocation.split(',');
     setState(() {
-      location = "${cityCountry[0]},${cityCountry[2]}";
+      Location = "${cityCountry[0]},${cityCountry[2]}";
     });
   }
 
-  void locationEnter() {
+  void LocationEnterPopUp() {
     showDialog(
       context: context,
       builder: (context) {
         return SelectLocation(
-          onLocationSelected: changeCity,
+          ChangeLocationFunction: ChangeLocation_AppBar,
         );
       },
     );
@@ -40,8 +40,8 @@ class _HomePageState extends State<HomePage> {
         backgroundColor: Theme.of(context).colorScheme.primaryFixedDim,
         elevation: 10,
         title: GestureDetector(
-          onTap: locationEnter,
-          child: Center(child: Text(location, style: TextStyle(fontSize: 20))),
+          onTap: LocationEnterPopUp,
+          child: Center(child: Text(Location, style: TextStyle(fontSize: 20))),
         ),
       ),
       body: Column(

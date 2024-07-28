@@ -5,16 +5,16 @@ import 'package:weather_app/env/env.dart';
 import 'package:weather_app/utils/button.dart';
 import 'package:weatherapi/weatherapi.dart';
 
-String? _inputString = "";
+String? inputString = "";
 
 class SelectLocation extends StatelessWidget {
-  final Function(String) onLocationSelected;
-  const SelectLocation({super.key, required this.onLocationSelected});
+  final Function(String) ChangeLocationFunction;
+  const SelectLocation({super.key, required this.ChangeLocationFunction});
 
   @override
   Widget build(BuildContext context) {
-    void Onpressed() {
-      onLocationSelected(_inputString!);
+    void ButtonPressed() {
+      ChangeLocationFunction(inputString!);
       Navigator.of(context).pop();
     }
 
@@ -36,7 +36,8 @@ class SelectLocation extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 CustumButton(
-                  OnPressed: Onpressed,
+                  OnPressed: ButtonPressed,
+                  ButtonText: "OK",
                 ),
               ],
             ),
@@ -91,7 +92,7 @@ class _AsyncAutocompleteState extends State<_AsyncAutocomplete> {
   Widget build(BuildContext context) {
     return Autocomplete<String>(
       optionsBuilder: (TextEditingValue textEditingValue) async {
-        _inputString = textEditingValue.text;
+        inputString = textEditingValue.text;
         final Iterable<String>? options =
             await _debouncedSearch(textEditingValue.text);
         if (options == null) {
