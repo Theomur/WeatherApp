@@ -5,7 +5,7 @@ import 'package:weather_app/env/env.dart';
 import 'package:weather_app/utils/button.dart';
 import 'package:weatherapi/weatherapi.dart';
 
-String? inputString = "";
+String inputString = "";
 
 class SelectLocation extends StatelessWidget {
   final Function(String) ChangeLocationFunction;
@@ -14,7 +14,7 @@ class SelectLocation extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     void ButtonPressed() {
-      ChangeLocationFunction(inputString!);
+      ChangeLocationFunction(inputString);
       Navigator.of(context).pop();
     }
 
