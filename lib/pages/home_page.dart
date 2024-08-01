@@ -95,9 +95,7 @@ class _HomePageState extends State<HomePage> {
                             ],
                           ),
                           Row(
-                            children: [
-                              Text("Max $maxTemp • Min $minTemp")
-                            ],
+                            children: [Text("Max $maxTemp • Min $minTemp")],
                           ),
                         ],
                       ),
