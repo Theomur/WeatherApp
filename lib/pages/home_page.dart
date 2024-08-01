@@ -11,6 +11,8 @@ String currentTemp = "100$degreeSym";
 String currentIcon = "https://cdn.weatherapi.com/weather/64x64/day/113.png";
 String maxTemp = "-100$degreeSym";
 String minTemp = "200$degreeSym";
+String conditionText = "cloudy?";
+String perceptionTemp = "100";
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -47,6 +49,8 @@ class _HomePageState extends State<HomePage> {
       currentIcon = weatherInf.current.conditionIcon;
       maxTemp = weatherInf.forecast.first.day.maxtempC + degreeSym;
       minTemp = weatherInf.forecast.first.day.mintempC + degreeSym;
+      perceptionTemp = weatherInf.current.feelslikeC;
+      conditionText = weatherInf.current.conditionText;
     });
     return Future.delayed(Duration(seconds: 1));
   }
@@ -92,11 +96,18 @@ class _HomePageState extends State<HomePage> {
                                 style: TextStyle(fontSize: 30),
                               ),
                               Image.network(currentIcon),
+                              SizedBox(
+                                width: 50,
+                              ),
+                              Column(
+                                children: [
+                                  Text(conditionText),
+                                  Text("Feels like $perceptionTemp$degreeSym"),
+                                ],
+                              ),
                             ],
                           ),
-                          Row(
-                            children: [Text("Max $maxTemp • Min $minTemp")],
-                          ),
+                          Text("Maximum $maxTemp • Minimum $minTemp")
                         ],
                       ),
                     ],
