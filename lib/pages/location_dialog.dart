@@ -71,7 +71,8 @@ class _AsyncAutocompleteState extends State<_AsyncAutocomplete> {
     _currentQuery = query;
 
     // In a real application, there should be some error handling here.
-    final Iterable<String> options = await WeatherAPI.search(_currentQuery!);
+    final Iterable<String> options =
+        await WeatherAPIsearch.search(_currentQuery!);
 
     // If another search happened after this one, throw away these options.
     if (_currentQuery != query) {
@@ -109,16 +110,14 @@ class _AsyncAutocompleteState extends State<_AsyncAutocomplete> {
 }
 
 // API.
-class WeatherAPI {
-  static const String key = Env.apikey;
-
+class WeatherAPIsearch {
   static Future<Iterable<String>> search(String query) async {
     if (query == '') {
       return const Iterable<String>.empty();
     }
 
     List<String> kOptions = [];
-    WeatherRequest wr = WeatherRequest(key);
+    WeatherRequest wr = WeatherRequest(Env.apikey);
     SearchResults sr = await wr.getResultsByCityName(query);
     for (LocationResultData location in sr.locations) {
       kOptions

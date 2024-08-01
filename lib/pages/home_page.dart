@@ -1,9 +1,8 @@
 // ignore_for_file: prefer_const_literals_to_create_immutables
 
 import 'package:flutter/material.dart';
-import 'package:weather_app/env/env.dart';
 import 'package:weather_app/pages/location_dialog.dart';
-import 'package:weatherapi/weatherapi.dart';
+import 'package:weather_app/utils/api_json_parsing.dart';
 
 String Location = 'Moscow, Russia';
 
@@ -41,17 +40,13 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> WeatherUpdate() async {
-    WeatherRequest wr = WeatherRequest(Env.apikey);
     String cityName = Location.split(",")[0];
-    RealtimeWeather rw = await wr.getRealtimeWeatherByCityName(cityName);
-    // ForecastWeather fw =
-    //     await wr.getForecastWeatherByCityName(cityName); // UNCNOWN TYPE ERROR
-
+    Weather weatherInf = await WeatherService().fetchWeather(cityName);
     setState(() {
-      currentTemp = "${rw.current.tempC}$degreeSym";
-      currentIcon = "https:${rw.current.condition.icon}";
-      maxTemp = "100";
-      minTemp = "100";
+      currentTemp = "${weatherInf.current.tempC}$degreeSym";
+      currentIcon = weatherInf.current.conditionIcon;
+      maxTemp = weatherInf.forecast.first.day.maxtempC + degreeSym;
+      minTemp = weatherInf.forecast.first.day.mintempC + degreeSym;
     });
     return Future.delayed(Duration(seconds: 1));
   }
@@ -101,7 +96,7 @@ class _HomePageState extends State<HomePage> {
                           ),
                           Row(
                             children: [
-                              Text("Maximum $maxTemp • Minimum $minTemp")
+                              Text("Max $maxTemp • Min $minTemp")
                             ],
                           ),
                         ],
