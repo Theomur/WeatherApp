@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:weather_app/env/env.dart';
-import 'package:weather_app/utils/button.dart';
+import 'package:weather_app/utils/buttons.dart';
 import 'package:weatherapi/weatherapi.dart';
 
 String inputString = "";
