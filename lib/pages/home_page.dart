@@ -7,46 +7,101 @@ import 'package:weather_app/utils/api_json_parsing.dart';
 String location = 'Moscow, Russia';
 
 String degreeSym = "°";
-String displayTemp = "17.2$degreeSym";
+String displayTemp = "100$degreeSym";
 String displayIcon = "https://cdn.weatherapi.com/weather/64x64/day/113.png";
-String displayMaxTemp = "20.3$degreeSym";
-String displayMinTemp = "13.4$degreeSym";
-String displayConditionText = "Patchy rain nearby";
-String displayPerceptionTemp = "17.2";
+String displayMaxTemp = "100$degreeSym";
+String displayMinTemp = "-100$degreeSym";
+String displayConditionText = "sad";
+String displayPerceptionTemp = "101";
 String selectedDateText = "Currently";
 
 int selectedDate = 0;
 
-Future<String> forecastGetIcons(index) async {
+List<String> forecastDayList = [
+  "today",
+  "today",
+  "today",
+  "today",
+  "today",
+  "today",
+  "today",
+  "today",
+  "today",
+  "today"
+];
+List<String> forecastIconList = [
+  "https://cdn.weatherapi.com/weather/64x64/day/113.png",
+  "https://cdn.weatherapi.com/weather/64x64/day/113.png",
+  "https://cdn.weatherapi.com/weather/64x64/day/113.png",
+  "https://cdn.weatherapi.com/weather/64x64/day/113.png",
+  "https://cdn.weatherapi.com/weather/64x64/day/113.png",
+  "https://cdn.weatherapi.com/weather/64x64/day/113.png",
+  "https://cdn.weatherapi.com/weather/64x64/day/113.png",
+  "https://cdn.weatherapi.com/weather/64x64/day/113.png",
+  "https://cdn.weatherapi.com/weather/64x64/day/113.png",
+  "https://cdn.weatherapi.com/weather/64x64/day/113.png"
+];
+List<String> forecastTempList = [
+  "9/10",
+  "9/10",
+  "9/10",
+  "9/10",
+  "9/10",
+  "9/10",
+  "9/10",
+  "9/10",
+  "9/10",
+  "9/10"
+];
+
+Future<List<String>> forecastGetIcons() async {
   String cityName = location.split(",")[0];
   Weather weatherInf = await WeatherService().fetchWeather(cityName);
 
-  String iconLink = weatherInf.forecast[index].day.conditionIcon;
+  List<String> list = ["", "", "", "", "", "", "", "", "", ""];
 
-  return iconLink;
+  for (int i = 0; i < 10; i++) {
+    String iconLink = weatherInf.forecast[i].day.conditionIcon;
+    list[i] = iconLink;
+  }
+
+  return list;
 }
 
-Future<String> forecastGetTemps(index) async {
+Future<List<String>> forecastGetTemps() async {
   String cityName = location.split(",")[0];
   Weather weatherInf = await WeatherService().fetchWeather(cityName);
 
-  String maxt = weatherInf.forecast[index].day.maxtempC + degreeSym;
-  String mint = weatherInf.forecast[index].day.mintempC + degreeSym;
+  List<String> list = ["", "", "", "", "", "", "", "", "", ""];
 
-  return '$maxt/$mint';
+  for (int i = 0; i < 10; i++) {
+    String maxt = weatherInf.forecast[i].day.maxtempC + degreeSym;
+    String mint = weatherInf.forecast[i].day.mintempC + degreeSym;
+
+    list[i] = '$maxt/$mint';
+  }
+  return list;
 }
 
-Future<String> dayToString(index) async {
+Future<List<String>> dayToString() async {
   String cityName = location.split(",")[0];
   Weather weatherInf = await WeatherService().fetchWeather(cityName);
-  String date = weatherInf.forecast[index].date;
-  int day = int.parse(date.split("-")[2]);
-  int month = int.parse(date.split("-")[1]);
-  String monthStr = getMonth(month);
-  int year = int.parse(date.split("-")[0]);
 
-  String weekDay = getDayOfWeek(DateTime(year, month, day));
-  return "$weekDay, $day $monthStr";
+  List<String> list = ["", "", "", "", "", "", "", "", "", ""];
+
+  for (int i = 0; i < 10; i++) {
+    String date = weatherInf.forecast[i].date;
+
+    int day = int.parse(date.split("-")[2]);
+    int month = int.parse(date.split("-")[1]);
+    String monthStr = getMonth(month);
+    int year = int.parse(date.split("-")[0]);
+
+    String weekDay = getDayOfWeek(DateTime(year, month, day));
+
+    list[i] = "$weekDay, $day $monthStr";
+  }
+  return list;
 }
 
 String getMonth(int month) {
@@ -81,7 +136,6 @@ String getDayOfWeek(DateTime date) {
     'Saturday',
     'Sunday'
   ];
-  // Возвращаем название дня недели на основе индекса
   return days[date.weekday - 1];
 }
 
@@ -144,15 +198,24 @@ class _HomePageState extends State<HomePage> {
   Future<void> weatherUpdate() async {
     String cityName = location.split(",")[0];
     Weather weatherInf = await WeatherService().fetchWeather(cityName);
+    List<String> forecastDayListAsync = await dayToString();
+    List<String> forecastIconListAsync = await forecastGetIcons();
+    List<String> forecastTempListAsync = await forecastGetTemps();
+
     setState(() {
       selectedDate = 0;
+      displayTemp = "${weatherInf.forecast[0].day.avgtempC}$degreeSym";
+      displayIcon = weatherInf.forecast[0].day.conditionIcon;
+      displayMaxTemp = "${weatherInf.forecast[0].day.maxtempC}$degreeSym";
+      displayMinTemp = "${weatherInf.forecast[0].day.mintempC}$degreeSym";
+      displayConditionText = weatherInf.forecast[0].day.conditionText;
+      displayPerceptionTemp = "Feels like ${weatherInf.current.feelslikeC}";
+
+      forecastDayList = forecastDayListAsync;
+      forecastIconList = forecastIconListAsync;
+      forecastTempList = forecastTempListAsync;
     });
-    displayTemp = "${weatherInf.forecast[0].day.avgtempC}$degreeSym";
-    displayIcon = weatherInf.forecast[0].day.conditionIcon;
-    displayMaxTemp = "${weatherInf.forecast[0].day.maxtempC}$degreeSym";
-    displayMinTemp = "${weatherInf.forecast[0].day.mintempC}$degreeSym";
-    displayConditionText = weatherInf.forecast[0].day.conditionText;
-    displayPerceptionTemp = "Feels like ${weatherInf.current.feelslikeC}";
+
     return Future.delayed(Duration(seconds: 1));
   }
 
@@ -241,7 +304,7 @@ class _HomePageState extends State<HomePage> {
                                   ? Theme.of(context)
                                       .colorScheme
                                       .primary
-                                      .withOpacity(0.55)
+                                      .withOpacity(0.45)
                                   : Theme.of(context)
                                       .colorScheme
                                       .primaryFixedDim,
@@ -254,57 +317,16 @@ class _HomePageState extends State<HomePage> {
                                         "Today",
                                         style: TextStyle(fontSize: 20),
                                       )
-                                    : FutureBuilder<String>(
-                                        future: dayToString(index),
-                                        builder: (context, snapshot) {
-                                          if (snapshot.connectionState ==
-                                              ConnectionState.waiting) {
-                                            return CircularProgressIndicator();
-                                          } else if (snapshot.hasError) {
-                                            return Text(
-                                                'Error: ${snapshot.error}');
-                                          } else {
-                                            return Text(
-                                              snapshot.data ?? '',
-                                              style: TextStyle(fontSize: 18),
-                                            );
-                                          }
-                                        },
+                                    : Text(
+                                        forecastDayList[index],
+                                        style: TextStyle(fontSize: 18),
                                       ),
                                 Row(
                                   children: [
-                                    FutureBuilder<String>(
-                                      future: forecastGetIcons(index),
-                                      builder: (context, snapshot) {
-                                        if (snapshot.connectionState ==
-                                            ConnectionState.waiting) {
-                                          return CircularProgressIndicator();
-                                        } else if (snapshot.hasError) {
-                                          return Text(
-                                              'Error: ${snapshot.error}');
-                                        } else {
-                                          return Image.network(
-                                            snapshot.data ?? '',
-                                          );
-                                        }
-                                      },
-                                    ),
-                                    FutureBuilder<String>(
-                                      future: forecastGetTemps(index),
-                                      builder: (context, snapshot) {
-                                        if (snapshot.connectionState ==
-                                            ConnectionState.waiting) {
-                                          return CircularProgressIndicator();
-                                        } else if (snapshot.hasError) {
-                                          return Text(
-                                              'Error: ${snapshot.error}');
-                                        } else {
-                                          return Text(
-                                            snapshot.data ?? '',
-                                            style: TextStyle(fontSize: 18),
-                                          );
-                                        }
-                                      },
+                                    Image.network(forecastIconList[index]),
+                                    Text(
+                                      forecastTempList[index],
+                                      style: TextStyle(fontSize: 18),
                                     ),
                                   ],
                                 ),
