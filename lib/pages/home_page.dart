@@ -68,14 +68,18 @@ Future<List<List<dynamic>>> hourlyForecastGet(context) async {
   int currentHour = now.hour;
 
   List<ForecastDay> forecast = weatherInf.forecast;
-  int hoursBeforeNow = currentHour - 1;
 
   List<List> hourlyList = List.generate(10, (dayIndex) {
+    int hoursBeforeNow = currentHour;
     return List.generate(
         dayIndex == 0
             ? forecast[dayIndex].hours.length - hoursBeforeNow
             : forecast[dayIndex].hours.length, (hourIndex) {
-      Hour hoursItem = forecast[dayIndex].hours[hourIndex + hoursBeforeNow];
+      int indexHour = hourIndex;
+      if (dayIndex == 0) {
+        indexHour += hoursBeforeNow;
+      }
+      Hour hoursItem = forecast[dayIndex].hours[indexHour];
 
       if (dayIndex == 0) {
         if (int.parse(hoursItem.time.split(" ")[1].split(":")[0]) >=
@@ -84,7 +88,7 @@ Future<List<List<dynamic>>> hourlyForecastGet(context) async {
             padding: EdgeInsets.all(10),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(10),
-              color: Theme.of(context).colorScheme.primary.withOpacity(0.45),
+              color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
             ),
             width: 70,
             child: Column(
@@ -105,7 +109,7 @@ Future<List<List<dynamic>>> hourlyForecastGet(context) async {
           padding: EdgeInsets.all(10),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(10),
-            color: Theme.of(context).colorScheme.primary.withOpacity(0.45),
+            color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
           ),
           width: 70,
           child: Column(
@@ -244,6 +248,7 @@ class _PageIndicator extends StatelessWidget {
 
 class _HomePageState extends State<HomePage> {
   final PageController _pageController = PageController();
+  final ScrollController _scrollController = ScrollController();
   int _currentIndex = 0;
 
   void changeLocationAppBar(String newLocation) {
@@ -277,6 +282,7 @@ class _HomePageState extends State<HomePage> {
     }
     setState(() {
       selectedDate = 0;
+      selectedDateText = "Current";
       displayTemp = "${weatherInf.forecast[0].day.avgtempC}$degreeSym";
       displayIcon = weatherInf.forecast[0].day.conditionIcon;
       displayMaxTemp = "${weatherInf.forecast[0].day.maxtempC}$degreeSym";
@@ -293,8 +299,11 @@ class _HomePageState extends State<HomePage> {
     return Future.delayed(Duration(seconds: 0));
   }
 
-  changeHourlyForecast(int index) {
-    return;
+  changeCurrentForecast(int index) {
+    setState(() {
+      selectedDate = index;
+      selectedDateText = index == 0 ? "Current" : forecastDayList[index];
+    });
   }
 
   @override
@@ -318,6 +327,7 @@ class _HomePageState extends State<HomePage> {
         color: Theme.of(context).colorScheme.primary.withOpacity(0.5),
         springAnimationDurationInMilliseconds: 800,
         child: ListView(
+          controller: _scrollController,
           children: [
             Padding(
               padding: const EdgeInsets.all(20.0),
@@ -355,7 +365,7 @@ class _HomePageState extends State<HomePage> {
             Padding(
               padding: const EdgeInsets.only(bottom: 20, left: 20, right: 20),
               child: Container(
-                height: 200,
+                height: 180,
                 decoration:
                     BoxDecoration(borderRadius: BorderRadius.circular(10)),
                 child: Container(
@@ -363,14 +373,16 @@ class _HomePageState extends State<HomePage> {
                     borderRadius: BorderRadius.circular(10),
                     color: Theme.of(context).colorScheme.primaryFixedDim,
                   ),
-                  padding: EdgeInsets.all(10),
+                  padding: EdgeInsets.only(bottom: 10, top: 10),
                   child: ListView.builder(
                     scrollDirection: Axis.horizontal,
                     padding: EdgeInsets.all(10),
                     itemCount: hourlyForecastWidgetsList[selectedDate].length,
                     itemBuilder: (BuildContext context, index) {
                       return Padding(
-                        padding: const EdgeInsets.only(right: 10),
+                        padding: index == 0
+                            ? EdgeInsets.only(right: 10, left: 10)
+                            : EdgeInsets.only(right: 10),
                         child: hourlyForecastWidgetsList[selectedDate][index],
                       );
                     },
@@ -398,8 +410,7 @@ class _HomePageState extends State<HomePage> {
                       children: List.generate(10, (index) {
                         return Padding(
                           padding: const EdgeInsets.all(2.0),
-                          child: GestureDetector(
-                            onTap: changeHourlyForecast(index),
+                          child: InkWell(
                             child: Container(
                               padding: EdgeInsets.all(10),
                               decoration: BoxDecoration(
@@ -446,6 +457,13 @@ class _HomePageState extends State<HomePage> {
                                 ],
                               ),
                             ),
+                            onTap: () {
+                              changeCurrentForecast(index);
+                              _scrollController.animateTo(
+                                  _scrollController.position.minScrollExtent,
+                                  duration: Duration(milliseconds: 750),
+                                  curve: Curves.fastOutSlowIn);
+                            },
                           ),
                         );
                       }),
