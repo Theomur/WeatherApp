@@ -145,18 +145,21 @@ class Hour {
   final String cloud;
   final String feelslikeC;
   final String uv;
+  final String chanceOfRain;
 
-  Hour(
-      {required this.time,
-      required this.tempC,
-      required this.tempF,
-      required this.conditionText,
-      required this.conditionIcon,
-      required this.windKph,
-      required this.humidity,
-      required this.cloud,
-      required this.feelslikeC,
-      required this.uv});
+  Hour({
+    required this.time,
+    required this.tempC,
+    required this.tempF,
+    required this.conditionText,
+    required this.conditionIcon,
+    required this.windKph,
+    required this.humidity,
+    required this.cloud,
+    required this.feelslikeC,
+    required this.uv,
+    required this.chanceOfRain,
+  });
 
   factory Hour.fromJson(Map<String, dynamic> json) {
     return Hour(
@@ -170,6 +173,7 @@ class Hour {
       cloud: json['cloud'].toString(),
       feelslikeC: json['feelslike_c'].toString(),
       uv: json['uv'].toString(),
+      chanceOfRain: json['chance_of_rain'].toString(),
     );
   }
 }

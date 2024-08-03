@@ -13,8 +13,9 @@ dependencies:
   cupertino_icons: ^1.0.6
   envied: ^0.5.4+1
   weatherapi: ^1.1.0
-  geolocator: ^11.1.0
   http: ^1.2.2
+  liquid_pull_to_refresh: ^3.0.1
+  location: ^6.0.2
 
 dev_dependencies:
   flutter_test:

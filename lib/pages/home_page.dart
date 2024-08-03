@@ -1,6 +1,7 @@
 // ignore_for_file: prefer_const_literals_to_create_immutables
 
 import 'package:flutter/material.dart';
+import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
 import 'package:weather_app/pages/location_dialog.dart';
 import 'package:weather_app/utils/api_json_parsing.dart';
 
@@ -53,6 +54,75 @@ List<String> forecastTempList = [
   "9/10",
   "9/10"
 ];
+
+List<List> hourlyForecastWidgetsList = List.generate(10, (dayIndex) {
+  return List.generate(10, (hourIndex) {
+    return Text(hourIndex.toString() + dayIndex.toString());
+  });
+});
+
+Future<List<List<dynamic>>> hourlyForecastGet(context) async {
+  String cityName = location.split(",")[0];
+  Weather weatherInf = await WeatherService().fetchWeather(cityName);
+  DateTime now = DateTime.now();
+  int currentHour = now.hour;
+
+  List<ForecastDay> forecast = weatherInf.forecast;
+  int hoursBeforeNow = currentHour - 1;
+
+  List<List> hourlyList = List.generate(10, (dayIndex) {
+    return List.generate(
+        dayIndex == 0
+            ? forecast[dayIndex].hours.length - hoursBeforeNow
+            : forecast[dayIndex].hours.length, (hourIndex) {
+      Hour hoursItem = forecast[dayIndex].hours[hourIndex + hoursBeforeNow];
+
+      if (dayIndex == 0) {
+        if (int.parse(hoursItem.time.split(" ")[1].split(":")[0]) >=
+            currentHour) {
+          return Container(
+            padding: EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              color: Theme.of(context).colorScheme.primary.withOpacity(0.45),
+            ),
+            width: 70,
+            child: Column(
+              children: [
+                Text(hoursItem.tempC + degreeSym),
+                Text("${hoursItem.chanceOfRain}%"),
+                Image.network(hoursItem.conditionIcon),
+                int.parse(hoursItem.time.split(" ")[1].split(":")[0]) ==
+                        currentHour
+                    ? Text("Now")
+                    : Text(hoursItem.time.split(" ")[1]),
+              ],
+            ),
+          );
+        }
+      } else {
+        return Container(
+          padding: EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(10),
+            color: Theme.of(context).colorScheme.primary.withOpacity(0.45),
+          ),
+          width: 70,
+          child: Column(
+            children: [
+              Text(hoursItem.tempC + degreeSym),
+              Text("${hoursItem.chanceOfRain}%"),
+              Image.network(hoursItem.conditionIcon),
+              Text(hoursItem.time.split(" ")[1]),
+            ],
+          ),
+        );
+      }
+    });
+  });
+
+  return hourlyList;
+}
 
 Future<List<String>> forecastGetIcons() async {
   String cityName = location.split(",")[0];
@@ -201,7 +271,10 @@ class _HomePageState extends State<HomePage> {
     List<String> forecastDayListAsync = await dayToString();
     List<String> forecastIconListAsync = await forecastGetIcons();
     List<String> forecastTempListAsync = await forecastGetTemps();
-
+    List<List<dynamic>> hourlyForecastWidgetsListTemp = [];
+    if (mounted) {
+      hourlyForecastWidgetsListTemp = await hourlyForecastGet(context);
+    }
     setState(() {
       selectedDate = 0;
       displayTemp = "${weatherInf.forecast[0].day.avgtempC}$degreeSym";
@@ -214,9 +287,14 @@ class _HomePageState extends State<HomePage> {
       forecastDayList = forecastDayListAsync;
       forecastIconList = forecastIconListAsync;
       forecastTempList = forecastTempListAsync;
+      hourlyForecastWidgetsList = hourlyForecastWidgetsListTemp;
     });
 
-    return Future.delayed(Duration(seconds: 1));
+    return Future.delayed(Duration(seconds: 0));
+  }
+
+  changeHourlyForecast(int index) {
+    return;
   }
 
   @override
@@ -232,8 +310,13 @@ class _HomePageState extends State<HomePage> {
           child: Center(child: Text(location, style: TextStyle(fontSize: 20))),
         ),
       ),
-      body: RefreshIndicator(
+      body: LiquidPullToRefresh(
         onRefresh: weatherUpdate,
+        animSpeedFactor: 2,
+        height: 90,
+        backgroundColor: Theme.of(context).colorScheme.primaryFixed,
+        color: Theme.of(context).colorScheme.primary.withOpacity(0.5),
+        springAnimationDurationInMilliseconds: 800,
         child: ListView(
           children: [
             Padding(
@@ -269,6 +352,32 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
             ),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 20, left: 20, right: 20),
+              child: Container(
+                height: 200,
+                decoration:
+                    BoxDecoration(borderRadius: BorderRadius.circular(10)),
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    color: Theme.of(context).colorScheme.primaryFixedDim,
+                  ),
+                  padding: EdgeInsets.all(10),
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    padding: EdgeInsets.all(10),
+                    itemCount: hourlyForecastWidgetsList[selectedDate].length,
+                    itemBuilder: (BuildContext context, index) {
+                      return Padding(
+                        padding: const EdgeInsets.only(right: 10),
+                        child: hourlyForecastWidgetsList[selectedDate][index],
+                      );
+                    },
+                  ),
+                ),
+              ),
+            ),
             _PageIndicator(currentIndex: _currentIndex),
             SizedBox(
               height: 5,
@@ -289,48 +398,53 @@ class _HomePageState extends State<HomePage> {
                       children: List.generate(10, (index) {
                         return Padding(
                           padding: const EdgeInsets.all(2.0),
-                          child: Container(
-                            padding: EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.only(
-                                topLeft: Radius.circular(index == 0 ? 10 : 5),
-                                topRight: Radius.circular(index == 0 ? 10 : 5),
-                                bottomLeft:
-                                    Radius.circular(index == 9 ? 10 : 5),
-                                bottomRight:
-                                    Radius.circular(index == 9 ? 10 : 5),
+                          child: GestureDetector(
+                            onTap: changeHourlyForecast(index),
+                            child: Container(
+                              padding: EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.only(
+                                  topLeft: Radius.circular(index == 0 ? 10 : 5),
+                                  topRight:
+                                      Radius.circular(index == 0 ? 10 : 5),
+                                  bottomLeft:
+                                      Radius.circular(index == 9 ? 10 : 5),
+                                  bottomRight:
+                                      Radius.circular(index == 9 ? 10 : 5),
+                                ),
+                                color: index == selectedDate
+                                    ? Theme.of(context)
+                                        .colorScheme
+                                        .primary
+                                        .withOpacity(0.45)
+                                    : Theme.of(context)
+                                        .colorScheme
+                                        .primaryFixedDim,
                               ),
-                              color: index == selectedDate
-                                  ? Theme.of(context)
-                                      .colorScheme
-                                      .primary
-                                      .withOpacity(0.45)
-                                  : Theme.of(context)
-                                      .colorScheme
-                                      .primaryFixedDim,
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                index == 0
-                                    ? Text(
-                                        "Today",
-                                        style: TextStyle(fontSize: 20),
-                                      )
-                                    : Text(
-                                        forecastDayList[index],
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  index == 0
+                                      ? Text(
+                                          "Today",
+                                          style: TextStyle(fontSize: 20),
+                                        )
+                                      : Text(
+                                          forecastDayList[index],
+                                          style: TextStyle(fontSize: 18),
+                                        ),
+                                  Row(
+                                    children: [
+                                      Image.network(forecastIconList[index]),
+                                      Text(
+                                        forecastTempList[index],
                                         style: TextStyle(fontSize: 18),
                                       ),
-                                Row(
-                                  children: [
-                                    Image.network(forecastIconList[index]),
-                                    Text(
-                                      forecastTempList[index],
-                                      style: TextStyle(fontSize: 18),
-                                    ),
-                                  ],
-                                ),
-                              ],
+                                    ],
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         );
