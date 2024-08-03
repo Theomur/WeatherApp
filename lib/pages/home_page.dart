@@ -1,9 +1,12 @@
-// ignore_for_file: prefer_const_literals_to_create_immutables
+// ignore_for_file: prefer_const_literals_to_create_immutables, no_leading_underscores_for_local_identifiers
 
 import 'package:flutter/material.dart';
 import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
+import 'package:location/location.dart';
+import 'package:weather_app/env/env.dart';
 import 'package:weather_app/pages/location_dialog.dart';
 import 'package:weather_app/utils/api_json_parsing.dart';
+import 'package:weatherapi/weatherapi.dart';
 
 String location = 'Moscow, Russia';
 
@@ -60,6 +63,42 @@ List<List> hourlyForecastWidgetsList = List.generate(10, (dayIndex) {
     return Text(hourIndex.toString() + dayIndex.toString());
   });
 });
+
+Future<String> getLocationFromGeolocation() async {
+  Location Geolocation = Location();
+  String newLocation;
+
+  bool _serviceEnabled;
+  PermissionStatus _permissionGranted;
+
+  _serviceEnabled = await Geolocation.serviceEnabled();
+  if (!_serviceEnabled) {
+    _serviceEnabled = await Geolocation.requestService();
+    if (!_serviceEnabled) {
+      return location;
+    }
+  }
+
+  _permissionGranted = await Geolocation.hasPermission();
+  if (_permissionGranted == PermissionStatus.denied) {
+    _permissionGranted = await Geolocation.requestPermission();
+    if (_permissionGranted != PermissionStatus.granted) {
+      return location;
+    }
+  }
+
+  var _locationData = await Geolocation.getLocation();
+  double? lon = _locationData.longitude;
+  double? lat = _locationData.latitude;
+
+  if (lon != null && lat != null) {
+    WeatherRequest wr = WeatherRequest(Env.apikey);
+    SearchResults sr = await wr.getResultsByLocation(lat, lon);
+    newLocation = "${sr.locations.first.name!}, ${sr.locations.first.country!}";
+    return newLocation;
+  }
+  return location;
+}
 
 Future<List<List<dynamic>>> hourlyForecastGet(context) async {
   String cityName = location.split(",")[0];
@@ -270,8 +309,13 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Future<void> weatherUpdate() async {
+  Future<void> weatherUpdate({bool useGeoloc = false}) async {
+    if (useGeoloc) {
+      location = await (getLocationFromGeolocation());
+    }
+    
     String cityName = location.split(",")[0];
+
     Weather weatherInf = await WeatherService().fetchWeather(cityName);
     List<String> forecastDayListAsync = await dayToString();
     List<String> forecastIconListAsync = await forecastGetIcons();
@@ -314,9 +358,17 @@ class _HomePageState extends State<HomePage> {
         shadowColor: Theme.of(context).colorScheme.primary,
         backgroundColor: Theme.of(context).colorScheme.primaryFixedDim,
         elevation: 10,
+        leading: IconButton(
+          icon: Icon(Icons.location_on),
+          onPressed: () {
+            setState(() {
+              weatherUpdate(useGeoloc: true);
+            });
+          },
+        ),
         title: GestureDetector(
           onTap: locationEnterPopUp,
-          child: Center(child: Text(location, style: TextStyle(fontSize: 20))),
+          child: Text(location, style: TextStyle(fontSize: 20)),
         ),
       ),
       body: LiquidPullToRefresh(

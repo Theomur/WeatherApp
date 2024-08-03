@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:weather_app/env/env.dart';
 
 class Weather {
-  final Location location;
+  final LocationApi location;
   final Current current;
   final List<ForecastDay> forecast;
 
@@ -13,7 +13,7 @@ class Weather {
 
   factory Weather.fromJson(Map<String, dynamic> json) {
     return Weather(
-      location: Location.fromJson(json['location']),
+      location: LocationApi.fromJson(json['location']),
       current: Current.fromJson(json['current']),
       forecast: (json['forecast']['forecastday'] as List)
           .map((i) => ForecastDay.fromJson(i))
@@ -22,7 +22,7 @@ class Weather {
   }
 }
 
-class Location {
+class LocationApi {
   final String name;
   final String region;
   final String country;
@@ -31,7 +31,7 @@ class Location {
   final String tzId;
   final String localtime;
 
-  Location(
+  LocationApi(
       {required this.name,
       required this.region,
       required this.country,
@@ -40,8 +40,8 @@ class Location {
       required this.tzId,
       required this.localtime});
 
-  factory Location.fromJson(Map<String, dynamic> json) {
-    return Location(
+  factory LocationApi.fromJson(Map<String, dynamic> json) {
+    return LocationApi(
       name: json['name'],
       region: json['region'],
       country: json['country'],
