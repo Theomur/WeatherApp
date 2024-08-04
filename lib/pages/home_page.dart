@@ -595,12 +595,38 @@ class _HomePageState extends State<HomePage> {
                         );
                       }),
                     ),
-                    Center(
-                      child: Text(
-                        'Test Text for Second Page',
-                        style: TextStyle(fontSize: 24),
+                    Column(children: [
+                      OrientationBuilder(
+                        builder: (context, orientation) {
+                          return Wrap(
+                              spacing: 15,
+                              runSpacing: 15,
+                              children: List.generate(4, (index) {
+                                return Container(
+                                  width: 160,
+                                  height: 230,
+                                  decoration: BoxDecoration(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .primaryFixedDim,
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                );
+                              }));
+                        },
                       ),
-                    ),
+                      Padding(
+                        padding: const EdgeInsets.only(top: 40),
+                        child: Container(
+                          height: 230,
+                          decoration: BoxDecoration(
+                            color:
+                                Theme.of(context).colorScheme.primaryFixedDim,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                      ),
+                    ])
                   ],
                 ),
               ),
