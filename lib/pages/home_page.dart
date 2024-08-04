@@ -17,6 +17,7 @@ String displayMaxTemp = "100$degreeSym";
 String displayMinTemp = "-100$degreeSym";
 String displayConditionText = "sad";
 String displayPerceptionTemp = "101";
+String rememberPerceptionTemp = "101";
 String selectedDateText = "Currently";
 
 int selectedDate = 0;
@@ -56,6 +57,32 @@ List<String> forecastTempList = [
   "9/10",
   "9/10",
   "9/10"
+];
+
+List<String> forecastFeelingTempList = [
+  "10",
+  "10",
+  "10",
+  "10",
+  "10",
+  "10",
+  "10",
+  "10",
+  "10",
+  "10"
+];
+
+List<String> forecastConditionTextList = [
+  "yes",
+  "yes",
+  "yes",
+  "yes",
+  "yes",
+  "yes",
+  "yes",
+  "yes",
+  "yes",
+  "yes"
 ];
 
 List<List> hourlyForecastWidgetsList = List.generate(10, (dayIndex) {
@@ -133,8 +160,13 @@ Future<List<List<dynamic>>> hourlyForecastGet(context) async {
             child: Column(
               children: [
                 Text(hoursItem.tempC + degreeSym),
-                Text("${hoursItem.chanceOfRain}%"),
+                Text(hoursItem.chanceOfRain == "0"
+                    ? ""
+                    : "${hoursItem.chanceOfRain}%"),
                 Image.network(hoursItem.conditionIcon),
+                SizedBox(
+                  height: 9,
+                ),
                 int.parse(hoursItem.time.split(" ")[1].split(":")[0]) ==
                         currentHour
                     ? Text("Now")
@@ -154,8 +186,13 @@ Future<List<List<dynamic>>> hourlyForecastGet(context) async {
           child: Column(
             children: [
               Text(hoursItem.tempC + degreeSym),
-              Text("${hoursItem.chanceOfRain}%"),
+              Text(hoursItem.chanceOfRain == "0"
+                  ? ""
+                  : "${hoursItem.chanceOfRain}%"),
               Image.network(hoursItem.conditionIcon),
+              SizedBox(
+                height: 9,
+              ),
               Text(hoursItem.time.split(" ")[1]),
             ],
           ),
@@ -181,18 +218,40 @@ Future<List<String>> forecastGetIcons() async {
   return list;
 }
 
-Future<List<String>> forecastGetTemps() async {
+Future<List<String>> forecastGetTemps({bool returnAverage = false}) async {
   String cityName = location.split(",")[0];
   Weather weatherInf = await WeatherService().fetchWeather(cityName);
 
   List<String> list = ["", "", "", "", "", "", "", "", "", ""];
+  List<String> listAver = ["", "", "", "", "", "", "", "", "", ""];
 
   for (int i = 0; i < 10; i++) {
     String maxt = weatherInf.forecast[i].day.maxtempC + degreeSym;
     String mint = weatherInf.forecast[i].day.mintempC + degreeSym;
+    String aver = weatherInf.forecast[i].day.avgtempC + degreeSym;
 
     list[i] = '$maxt/$mint';
+    listAver[i] = aver;
   }
+
+  if (returnAverage) {
+    return listAver;
+  }
+
+  return list;
+}
+
+Future<List<String>> forecastGetConditionTextList() async {
+  String cityName = location.split(",")[0];
+  Weather weatherInf = await WeatherService().fetchWeather(cityName);
+  List<String> list = ["", "", "", "", "", "", "", "", "", ""];
+
+  for (int i = 0; i < 10; i++) {
+    String str = weatherInf.forecast[i].day.conditionText;
+
+    list[i] = str;
+  }
+
   return list;
 }
 
@@ -313,13 +372,17 @@ class _HomePageState extends State<HomePage> {
     if (useGeoloc) {
       location = await (getLocationFromGeolocation());
     }
-    
+
     String cityName = location.split(",")[0];
 
     Weather weatherInf = await WeatherService().fetchWeather(cityName);
     List<String> forecastDayListAsync = await dayToString();
     List<String> forecastIconListAsync = await forecastGetIcons();
     List<String> forecastTempListAsync = await forecastGetTemps();
+    List<String> forecastFeelingTempListAsync =
+        await forecastGetTemps(returnAverage: true);
+    List<String> forecastConditionTextListAsync =
+        await forecastGetConditionTextList();
     List<List<dynamic>> hourlyForecastWidgetsListTemp = [];
     if (mounted) {
       hourlyForecastWidgetsListTemp = await hourlyForecastGet(context);
@@ -333,11 +396,13 @@ class _HomePageState extends State<HomePage> {
       displayMinTemp = "${weatherInf.forecast[0].day.mintempC}$degreeSym";
       displayConditionText = weatherInf.forecast[0].day.conditionText;
       displayPerceptionTemp = "Feels like ${weatherInf.current.feelslikeC}";
-
+      rememberPerceptionTemp = displayPerceptionTemp;
       forecastDayList = forecastDayListAsync;
       forecastIconList = forecastIconListAsync;
       forecastTempList = forecastTempListAsync;
+      forecastFeelingTempList = forecastFeelingTempListAsync;
       hourlyForecastWidgetsList = hourlyForecastWidgetsListTemp;
+      forecastConditionTextList = forecastConditionTextListAsync;
     });
 
     return Future.delayed(Duration(seconds: 0));
@@ -347,6 +412,13 @@ class _HomePageState extends State<HomePage> {
     setState(() {
       selectedDate = index;
       selectedDateText = index == 0 ? "Current" : forecastDayList[index];
+      displayPerceptionTemp = index == 0 ? rememberPerceptionTemp : "";
+
+      displayTemp = forecastFeelingTempList[index];
+      displayMaxTemp = forecastTempList[index].split("/")[0];
+      displayMinTemp = forecastTempList[index].split("/")[1];
+      displayIcon = forecastIconList[index];
+      displayConditionText = forecastConditionTextList[index];
     });
   }
 
@@ -392,7 +464,10 @@ class _HomePageState extends State<HomePage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(selectedDateText),
+                    Text(
+                      selectedDateText,
+                      style: TextStyle(fontSize: 18),
+                    ),
                     Row(
                       children: [
                         Text(
