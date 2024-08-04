@@ -22,6 +22,11 @@ String selectedDateText = "Currently";
 
 int selectedDate = 0;
 
+String displayWind = "100";
+String displayHumidity = "100";
+String displayUV = "20";
+String displayPressure = "5000";
+
 List<String> forecastDayList = [
   "today",
   "today",
@@ -83,6 +88,58 @@ List<String> forecastConditionTextList = [
   "yes",
   "yes",
   "yes"
+];
+
+List<String> windHourlyList = [
+  "100",
+  "100",
+  "100",
+  "100",
+  "100",
+  "100",
+  "100",
+  "100",
+  "100",
+  "100",
+];
+
+List<String> humidityHourlyList = [
+  "100",
+  "100",
+  "100",
+  "100",
+  "100",
+  "100",
+  "100",
+  "100",
+  "100",
+  "100",
+];
+
+List<String> UVHourlyList = [
+  "100",
+  "100",
+  "100",
+  "100",
+  "100",
+  "100",
+  "100",
+  "100",
+  "100",
+  "100",
+];
+
+List<String> pressureHourlyList = [
+  "100",
+  "100",
+  "100",
+  "100",
+  "100",
+  "100",
+  "100",
+  "100",
+  "100",
+  "100",
 ];
 
 List<List> hourlyForecastWidgetsList = List.generate(10, (dayIndex) {
@@ -255,6 +312,59 @@ Future<List<String>> forecastGetConditionTextList() async {
   return list;
 }
 
+Future<List<String>> windHourlyListAsyncGet() async {
+  String cityName = location.split(",")[0];
+  Weather weatherInf = await WeatherService().fetchWeather(cityName);
+  List<String> list = ["", "", "", "", "", "", "", "", "", ""];
+
+  for (int i = 0; i < 10; i++) {
+    list[i] = weatherInf.forecast[i].day.maxWindKph;
+  }
+
+  return list;
+}
+
+Future<List<String>> humidityHourlyListAsyncGet() async {
+  String cityName = location.split(",")[0];
+  Weather weatherInf = await WeatherService().fetchWeather(cityName);
+  List<String> list = ["", "", "", "", "", "", "", "", "", ""];
+
+  for (int i = 0; i < 10; i++) {
+    list[i] = weatherInf.forecast[i].day.humidity;
+  }
+
+  return list;
+}
+
+Future<List<String>> UVHourlyListAsyncGet() async {
+  String cityName = location.split(",")[0];
+  Weather weatherInf = await WeatherService().fetchWeather(cityName);
+  List<String> list = ["", "", "", "", "", "", "", "", "", ""];
+
+  for (int i = 0; i < 10; i++) {
+    list[i] = weatherInf.forecast[i].day.uv;
+  }
+
+  return list;
+}
+
+Future<List<String>> pressureHourlyListAsyncGet() async {
+  String cityName = location.split(",")[0];
+  Weather weatherInf = await WeatherService().fetchWeather(cityName);
+  List<String> list = ["", "", "", "", "", "", "", "", "", ""];
+  int pressureSum = 0;
+  for (int i = 0; i < 10; i++) {
+    for (int j = 0; j < 24; j++) {
+      pressureSum +=
+          int.parse(weatherInf.forecast[i].hours[j].pressure.split(".")[0]);
+    }
+    list[i] = (pressureSum / 24).toString().split(".")[0];
+    pressureSum = 0;
+  }
+
+  return list;
+}
+
 Future<List<String>> dayToString() async {
   String cityName = location.split(",")[0];
   Weather weatherInf = await WeatherService().fetchWeather(cityName);
@@ -368,6 +478,137 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  Widget secondPageInfo(int index) {
+    double distanceBetween = 20;
+    if (index == 0) {
+      return Column(
+        children: [
+          Text(
+            "Wind velocity",
+            style: TextStyle(fontSize: 15),
+          ),
+          Text(
+            "Average:",
+            style: TextStyle(fontSize: 13),
+          ),
+          SizedBox(
+            height: distanceBetween,
+          ),
+          Container(
+            padding: EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+            ),
+            child: Text(
+              "${displayWind}km/h",
+              style: TextStyle(fontSize: 20),
+            ),
+          ),
+        ],
+      );
+    } else if (index == 1) {
+      return Column(
+        children: [
+          Text(
+            "Humidity",
+            style: TextStyle(fontSize: 15),
+          ),
+          Text(
+            "Average:",
+            style: TextStyle(fontSize: 13),
+          ),
+          SizedBox(
+            height: distanceBetween,
+          ),
+          Container(
+            padding: EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+            ),
+            child: Text(
+              "$displayHumidity%",
+              style: TextStyle(fontSize: 20),
+            ),
+          )
+        ],
+      );
+    } else if (index == 2) {
+      return Column(
+        children: [
+          Text(
+            "UV index",
+            style: TextStyle(fontSize: 15),
+          ),
+          Text(
+            "Average:",
+            style: TextStyle(fontSize: 13),
+          ),
+          SizedBox(
+            height: distanceBetween,
+          ),
+          Container(
+            padding: EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+            ),
+            child: Text(
+              displayUV,
+              style: TextStyle(fontSize: 20),
+            ),
+          ),
+          Text(
+              "(${UVnumToTextConvertion(int.parse(displayUV.split(".")[0]))})"),
+        ],
+      );
+    } else {
+      return Column(
+        children: [
+          Text(
+            "Pressure",
+            style: TextStyle(fontSize: 15),
+          ),
+          Text(
+            selectedDate == 0 ? "Current:" : "Average:",
+            style: TextStyle(fontSize: 13),
+          ),
+          SizedBox(
+            height: distanceBetween,
+          ),
+          Container(
+            padding: EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+            ),
+            child: Text(
+              "${displayPressure}mb",
+              style: TextStyle(fontSize: 20),
+            ),
+          ),
+        ],
+      );
+    }
+  }
+
+  String UVnumToTextConvertion(index) {
+    if (0 <= index && index <= 2) {
+      return "Low";
+    }
+    if (3 <= index && index <= 5) {
+      return "Moderate";
+    }
+    if (6 <= index && index <= 7) {
+      return "High";
+    }
+    if (8 <= index && index <= 10) {
+      return "Very high";
+    }
+    return "Absurdly high";
+  }
+
   Future<void> weatherUpdate({bool useGeoloc = false}) async {
     if (useGeoloc) {
       location = await (getLocationFromGeolocation());
@@ -379,6 +620,7 @@ class _HomePageState extends State<HomePage> {
     List<String> forecastDayListAsync = await dayToString();
     List<String> forecastIconListAsync = await forecastGetIcons();
     List<String> forecastTempListAsync = await forecastGetTemps();
+
     List<String> forecastFeelingTempListAsync =
         await forecastGetTemps(returnAverage: true);
     List<String> forecastConditionTextListAsync =
@@ -387,6 +629,11 @@ class _HomePageState extends State<HomePage> {
     if (mounted) {
       hourlyForecastWidgetsListTemp = await hourlyForecastGet(context);
     }
+
+    List<String> windHourlyListAsync = await windHourlyListAsyncGet();
+    List<String> humidityHourlyListAsync = await humidityHourlyListAsyncGet();
+    List<String> UVHourlyListAsync = await UVHourlyListAsyncGet();
+    List<String> pressureHourlyListAsync = await pressureHourlyListAsyncGet();
     setState(() {
       selectedDate = 0;
       selectedDateText = "Current";
@@ -396,6 +643,7 @@ class _HomePageState extends State<HomePage> {
       displayMinTemp = "${weatherInf.forecast[0].day.mintempC}$degreeSym";
       displayConditionText = weatherInf.forecast[0].day.conditionText;
       displayPerceptionTemp = "Feels like ${weatherInf.current.feelslikeC}";
+
       rememberPerceptionTemp = displayPerceptionTemp;
       forecastDayList = forecastDayListAsync;
       forecastIconList = forecastIconListAsync;
@@ -403,6 +651,15 @@ class _HomePageState extends State<HomePage> {
       forecastFeelingTempList = forecastFeelingTempListAsync;
       hourlyForecastWidgetsList = hourlyForecastWidgetsListTemp;
       forecastConditionTextList = forecastConditionTextListAsync;
+
+      windHourlyList = windHourlyListAsync;
+      humidityHourlyList = humidityHourlyListAsync;
+      UVHourlyList = UVHourlyListAsync;
+      pressureHourlyList = pressureHourlyListAsync;
+      displayWind = windHourlyList[0];
+      displayHumidity = humidityHourlyList[0];
+      displayUV = UVHourlyList[0];
+      displayPressure = pressureHourlyList[0];
     });
 
     return Future.delayed(Duration(seconds: 0));
@@ -419,6 +676,11 @@ class _HomePageState extends State<HomePage> {
       displayMinTemp = forecastTempList[index].split("/")[1];
       displayIcon = forecastIconList[index];
       displayConditionText = forecastConditionTextList[index];
+
+      displayWind = windHourlyList[index];
+      displayHumidity = humidityHourlyList[index];
+      displayUV = UVHourlyList[index];
+      displayPressure = pressureHourlyList[index];
     });
   }
 
@@ -478,7 +740,13 @@ class _HomePageState extends State<HomePage> {
                         SizedBox(width: 50),
                         Column(
                           children: [
-                            Text(displayConditionText),
+                            SizedBox(
+                              width: 145,
+                              child: Text(
+                                displayConditionText,
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
                             Text(displayPerceptionTemp),
                           ],
                         ),
@@ -603,14 +871,17 @@ class _HomePageState extends State<HomePage> {
                               runSpacing: 15,
                               children: List.generate(4, (index) {
                                 return Container(
-                                  width: 160,
-                                  height: 230,
+                                  width: 135,
+                                  height: 150,
+                                  padding: EdgeInsets.all(10),
+                                  alignment: Alignment.topCenter,
                                   decoration: BoxDecoration(
                                     color: Theme.of(context)
                                         .colorScheme
                                         .primaryFixedDim,
                                     borderRadius: BorderRadius.circular(10),
                                   ),
+                                  child: secondPageInfo(index),
                                 );
                               }));
                         },

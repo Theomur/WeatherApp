@@ -112,15 +112,20 @@ class Day {
   final String avgtempC;
   final String conditionText;
   final String conditionIcon;
+  final String maxWindKph;
+  final String humidity;
   final String uv;
 
-  Day(
-      {required this.maxtempC,
-      required this.mintempC,
-      required this.avgtempC,
-      required this.conditionText,
-      required this.conditionIcon,
-      required this.uv});
+  Day({
+    required this.maxtempC,
+    required this.mintempC,
+    required this.avgtempC,
+    required this.conditionText,
+    required this.conditionIcon,
+    required this.maxWindKph,
+    required this.humidity,
+    required this.uv,
+  });
 
   factory Day.fromJson(Map<String, dynamic> json) {
     return Day(
@@ -129,6 +134,8 @@ class Day {
       avgtempC: json['avgtemp_c'].toString(),
       conditionText: json['condition']['text'],
       conditionIcon: "https:${json['condition']['icon']}",
+      maxWindKph: json['maxwind_mph'].toString(),
+      humidity: json['avghumidity'].toString(),
       uv: json['uv'].toString(),
     );
   }
@@ -140,12 +147,12 @@ class Hour {
   final String tempF;
   final String conditionText;
   final String conditionIcon;
-  final String windKph;
   final String humidity;
   final String cloud;
   final String feelslikeC;
   final String uv;
   final String chanceOfRain;
+  final String pressure;
 
   Hour({
     required this.time,
@@ -153,12 +160,12 @@ class Hour {
     required this.tempF,
     required this.conditionText,
     required this.conditionIcon,
-    required this.windKph,
     required this.humidity,
     required this.cloud,
     required this.feelslikeC,
     required this.uv,
     required this.chanceOfRain,
+    required this.pressure,
   });
 
   factory Hour.fromJson(Map<String, dynamic> json) {
@@ -168,12 +175,12 @@ class Hour {
       tempF: json['temp_f'].toString(),
       conditionText: json['condition']['text'],
       conditionIcon: "https:${json['condition']['icon']}",
-      windKph: json['wind_kph'].toString(),
       humidity: json['humidity'].toString(),
       cloud: json['cloud'].toString(),
       feelslikeC: json['feelslike_c'].toString(),
       uv: json['uv'].toString(),
       chanceOfRain: json['chance_of_rain'].toString(),
+      pressure: json['pressure_mb'].toString(),
     );
   }
 }
