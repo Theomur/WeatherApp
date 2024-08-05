@@ -93,13 +93,19 @@ class Current {
 class ForecastDay {
   final String date;
   final Day day;
+  final Astro astro;
   final List<Hour> hours;
 
-  ForecastDay({required this.date, required this.day, required this.hours});
+  ForecastDay(
+      {required this.date,
+      required this.day,
+      required this.astro,
+      required this.hours});
 
   factory ForecastDay.fromJson(Map<String, dynamic> json) {
     return ForecastDay(
       date: json['date'],
+      astro: Astro.fromJson(json['astro']),
       day: Day.fromJson(json['day']),
       hours: (json['hour'] as List).map((i) => Hour.fromJson(i)).toList(),
     );
@@ -137,6 +143,26 @@ class Day {
       maxWindKph: json['maxwind_mph'].toString(),
       humidity: json['avghumidity'].toString(),
       uv: json['uv'].toString(),
+    );
+  }
+}
+
+class Astro {
+  final String sunrise;
+  final String sunset;
+  final String moonphase;
+
+  Astro({
+    required this.sunrise,
+    required this.sunset,
+    required this.moonphase,
+  });
+
+  factory Astro.fromJson(Map<String, dynamic> json) {
+    return Astro(
+      sunrise: json['sunrise'],
+      sunset: json['sunset'],
+      moonphase: json['moon_phase'],
     );
   }
 }

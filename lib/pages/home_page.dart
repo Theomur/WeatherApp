@@ -142,6 +142,19 @@ List<String> pressureHourlyList = [
   "100",
 ];
 
+List<List<String>> secondPageButtomInfo = [
+  ["12:00", "12:00", "New moon"],
+  ["12:00", "12:00", "New moon"],
+  ["12:00", "12:00", "New moon"],
+  ["12:00", "12:00", "New moon"],
+  ["12:00", "12:00", "New moon"],
+  ["12:00", "12:00", "New moon"],
+  ["12:00", "12:00", "New moon"],
+  ["12:00", "12:00", "New moon"],
+  ["12:00", "12:00", "New moon"],
+  ["12:00", "12:00", "New moon"],
+];
+
 List<List> hourlyForecastWidgetsList = List.generate(10, (dayIndex) {
   return List.generate(10, (hourIndex) {
     return Text(hourIndex.toString() + dayIndex.toString());
@@ -362,6 +375,31 @@ Future<List<String>> pressureHourlyListAsyncGet() async {
     pressureSum = 0;
   }
 
+  return list;
+}
+
+Future<List<List<String>>> secondPageButtomInfoAsyncGet() async {
+  String cityName = location.split(",")[0];
+  Weather weatherInf = await WeatherService().fetchWeather(cityName);
+
+  List<List<String>> list = [
+    ["12:00", "12:00", "New moon"],
+    ["12:00", "12:00", "New moon"],
+    ["12:00", "12:00", "New moon"],
+    ["12:00", "12:00", "New moon"],
+    ["12:00", "12:00", "New moon"],
+    ["12:00", "12:00", "New moon"],
+    ["12:00", "12:00", "New moon"],
+    ["12:00", "12:00", "New moon"],
+    ["12:00", "12:00", "New moon"],
+    ["12:00", "12:00", "New moon"],
+  ];
+
+  for (var i = 0; i < 10; i++) {
+    list[i][0] = weatherInf.forecast[i].astro.sunrise;
+    list[i][1] = weatherInf.forecast[i].astro.sunset;
+    list[i][2] = weatherInf.forecast[i].astro.moonphase;
+  }
   return list;
 }
 
@@ -634,6 +672,8 @@ class _HomePageState extends State<HomePage> {
     List<String> humidityHourlyListAsync = await humidityHourlyListAsyncGet();
     List<String> UVHourlyListAsync = await UVHourlyListAsyncGet();
     List<String> pressureHourlyListAsync = await pressureHourlyListAsyncGet();
+    List<List<String>> secondPageButtomInfoAsync =
+        await secondPageButtomInfoAsyncGet();
     setState(() {
       selectedDate = 0;
       selectedDateText = "Current";
@@ -660,6 +700,7 @@ class _HomePageState extends State<HomePage> {
       displayHumidity = humidityHourlyList[0];
       displayUV = UVHourlyList[0];
       displayPressure = pressureHourlyList[0];
+      secondPageButtomInfo = secondPageButtomInfoAsync;
     });
 
     return Future.delayed(Duration(seconds: 0));
@@ -889,13 +930,70 @@ class _HomePageState extends State<HomePage> {
                       Padding(
                         padding: const EdgeInsets.only(top: 40),
                         child: Container(
-                          height: 230,
-                          decoration: BoxDecoration(
-                            color:
-                                Theme.of(context).colorScheme.primaryFixedDim,
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
+                            alignment: Alignment.bottomCenter,
+                            padding: EdgeInsets.only(
+                                top: 30, bottom: 30, left: 20, right: 20),
+                            decoration: BoxDecoration(
+                              color:
+                                  Theme.of(context).colorScheme.primaryFixedDim,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Column(
+                                  children: [
+                                    Text(
+                                      "Sunrise",
+                                      style: TextStyle(
+                                          fontSize: 15,
+                                          fontStyle: FontStyle.italic),
+                                    ),
+                                    SizedBox(
+                                      height: 10,
+                                    ),
+                                    Text(
+                                      secondPageButtomInfo[selectedDate][0],
+                                      style: TextStyle(fontSize: 15),
+                                    ),
+                                  ],
+                                ),
+                                Column(
+                                  children: [
+                                    Text(
+                                      "Sunset",
+                                      style: TextStyle(
+                                          fontSize: 15,
+                                          fontStyle: FontStyle.italic),
+                                    ),
+                                    SizedBox(
+                                      height: 15,
+                                    ),
+                                    Text(
+                                      secondPageButtomInfo[selectedDate][1],
+                                      style: TextStyle(fontSize: 15),
+                                    ),
+                                  ],
+                                ),
+                                Column(
+                                  children: [
+                                    Text(
+                                      "Moon phase",
+                                      style: TextStyle(
+                                          fontSize: 15,
+                                          fontStyle: FontStyle.italic),
+                                    ),
+                                    SizedBox(
+                                      height: 15,
+                                    ),
+                                    Text(
+                                      secondPageButtomInfo[selectedDate][2],
+                                      style: TextStyle(fontSize: 15),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            )),
                       ),
                     ])
                   ],
